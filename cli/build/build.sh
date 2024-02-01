@@ -9,6 +9,7 @@
 
 SCRIPT_DIR=$(dirname "$0")
 SOURCE_DIR="$SCRIPT_DIR/.."
+OUTPUT_DIR="$SOURCE_DIR/output"
 
 APP_NAME="cli"
 BUILDTIME=$(date --iso-8601=seconds)
@@ -23,7 +24,7 @@ goBuild() {
     -ldflags="-s -w \
     -X 'github.com/whoisnian/go-templates/cli/global.Version=${VERSION}' \
     -X 'github.com/whoisnian/go-templates/cli/global.BuildTime=${BUILDTIME}'" \
-    -o "$3" "$SOURCE_DIR"
+    -o "$OUTPUT_DIR"/"$3" "$SOURCE_DIR"
 }
 
 if [[ "$1" == '.' ]]; then
