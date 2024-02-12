@@ -37,6 +37,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup module name
+        id: module
+        run: echo "module_name=$(go mod edit -fmt -print | grep -Po '(?<=^module ).*$')" >> "$GITHUB_OUTPUT"
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -66,13 +70,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            MODULE_NAME=${{ steps.module.outputs.module_name }}
             APP_NAME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.title'] }}-docker
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
 
       - name: Save image tag
         id: save
-        run: echo "${{ matrix.arch }}_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> $GITHUB_OUTPUT
+        run: echo "${{ matrix.arch }}_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> "$GITHUB_OUTPUT"
 
   merge-images:
     runs-on: ubuntu-latest

@@ -11,7 +11,8 @@ SCRIPT_DIR=$(dirname "$0")
 SOURCE_DIR="$SCRIPT_DIR/.."
 OUTPUT_DIR="$SOURCE_DIR/output"
 
-APP_NAME=$(basename $(go mod edit -fmt -print | grep -Po '(?<=^module ).*$'))
+MODULE_NAME=$(go mod edit -fmt -print | grep -Po '(?<=^module ).*$')
+APP_NAME=$(basename "$MODULE_NAME")
 BUILDTIME=$(date --iso-8601=seconds)
 if [[ -z "$GITHUB_REF_NAME" ]]; then
   VERSION=$(git describe --tags 2> /dev/null || echo unknown)
@@ -22,9 +23,9 @@ fi
 goBuild() {
   CGO_ENABLED=0 GOOS="$1" GOARCH="$2" go build -trimpath \
     -ldflags="-s -w \
-    -X 'github.com/whoisnian/go-templates/cli/global.AppName=${APP_NAME}' \
-    -X 'github.com/whoisnian/go-templates/cli/global.Version=${VERSION}' \
-    -X 'github.com/whoisnian/go-templates/cli/global.BuildTime=${BUILDTIME}'" \
+    -X '${MODULE_NAME}/global.AppName=${APP_NAME}' \
+    -X '${MODULE_NAME}/global.Version=${VERSION}' \
+    -X '${MODULE_NAME}/global.BuildTime=${BUILDTIME}'" \
     -o "$OUTPUT_DIR"/"$3" "$SOURCE_DIR"
 }
 

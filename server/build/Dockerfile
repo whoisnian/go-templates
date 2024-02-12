@@ -3,6 +3,7 @@
 
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.22-alpine AS build
 
+ARG MODULE_NAME
 ARG APP_NAME
 ARG VERSION
 ARG BUILDTIME
@@ -20,9 +21,9 @@ RUN --mount=type=cache,target=/root/.cache/go-build/,id=build-$TARGETARCH \
     --mount=type=cache,target=/go/pkg/mod/ \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -trimpath -ldflags="-s -w \
-    -X 'github.com/whoisnian/go-templates/server/global.AppName=${APP_NAME}' \
-    -X 'github.com/whoisnian/go-templates/server/global.Version=${VERSION}' \
-    -X 'github.com/whoisnian/go-templates/server/global.BuildTime=${BUILDTIME}'" \
+    -X '${MODULE_NAME}/global.AppName=${APP_NAME}' \
+    -X '${MODULE_NAME}/global.Version=${VERSION}' \
+    -X '${MODULE_NAME}/global.BuildTime=${BUILDTIME}'" \
     -o main .
 
 FROM gcr.io/distroless/static-debian12:latest
