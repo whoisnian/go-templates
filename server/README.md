@@ -11,7 +11,7 @@ An HTTP server that serves plain messages CRUD.
 ## features
 * [x] Parsing command-line arguments, environment variables and config file
 * [x] Logging as json lines to stderr with custom log level
-* [ ] Build script for multiple platforms
-* [ ] GitHub Actions workflow for tagged release (need `Read and write permissions` in `Settings > Actions > General > Workflow permissions`)
+* [x] Build script for multiple platforms
+* [x] GitHub Actions workflow for tagged release (need `Read and write permissions` in `Settings > Actions > General > Workflow permissions`)
 * [ ] Systemd unit configuration file
-* [ ] Docker images for multiple platforms
+* [x] Docker images for multiple platforms
