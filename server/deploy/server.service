@@ -1,0 +1,11 @@
+[Unit]
+Description=An HTTP server that serves plain messages CRUD
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+ExecStart=/opt/server/server -config /opt/server/config.json
+
+[Install]
+WantedBy=multi-user.target
