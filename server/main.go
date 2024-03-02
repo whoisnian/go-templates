@@ -26,7 +26,8 @@ func main() {
 	defer global.DB.Close()
 	global.LOG.Debug("connect to postgresql successfully")
 	if global.CFG.FirstRun {
-		// TODO: initialize database
+		global.LOG.Info("initialize database schema in the first run")
+		global.InitDatabaseSchema()
 		return
 	}
 
