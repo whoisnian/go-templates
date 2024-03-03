@@ -1,8 +1,6 @@
 package global
 
-import (
-	"github.com/whoisnian/glb/config"
-)
+import "github.com/whoisnian/glb/config"
 
 var CFG Config
 
