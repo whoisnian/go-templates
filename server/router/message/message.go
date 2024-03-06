@@ -2,35 +2,56 @@ package message
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/whoisnian/glb/httpd"
-	"github.com/whoisnian/go-templates/cli/global"
-	"github.com/whoisnian/go-templates/server/model/message"
+	"github.com/whoisnian/go-templates/server/global"
+	"github.com/whoisnian/go-templates/server/model"
 )
 
 func ListHandler(store *httpd.Store) {
-	msgs, err := message.List(store.R.Context())
+	const sql = `SELECT id, content, created_at FROM messages`
+	rows, err := global.DB.Query(store.R.Context(), sql)
 	if err != nil {
-		global.LOG.Error(err.Error())
+		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	store.RespondJson(msgs)
+	defer rows.Close()
+
+	var results []model.Message
+	for rows.Next() {
+		var msg model.Message
+		if err = rows.Scan(&msg.Id, &msg.Content, &msg.CreatedAt); err != nil {
+			global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
+			store.W.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		results = append(results, msg)
+	}
+	if err = rows.Err(); err != nil {
+		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
+		store.W.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	store.RespondJson(results)
 }
 
 func CreateHandler(store *httpd.Store) {
-	var msg message.Message
+	var msg model.Message
 	err := json.NewDecoder(store.R.Body).Decode(&msg)
 	if err != nil {
 		store.W.WriteHeader(http.StatusBadRequest)
 		store.W.Write([]byte(err.Error()))
 		return
 	}
-	msg, err = message.Create(store.R.Context(), msg.Content)
-	if err != nil {
-		global.LOG.Error(err.Error())
+
+	const sql = `INSERT INTO messages (content) VALUES ($1) RETURNING id, content, created_at`
+	row := global.DB.QueryRow(store.R.Context(), sql, msg.Content)
+	if err = row.Scan(&msg.Id, &msg.Content, &msg.CreatedAt); err != nil {
+		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -44,8 +65,10 @@ func DeleteHandler(store *httpd.Store) {
 		store.W.Write([]byte("invalid ID"))
 		return
 	}
-	if err = message.DeleteById(store.R.Context(), id); err != nil {
-		global.LOG.Error(err.Error())
+
+	const sql = `DELETE FROM messages WHERE id = $1`
+	if _, err = global.DB.Exec(store.R.Context(), sql, id); err != nil {
+		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
