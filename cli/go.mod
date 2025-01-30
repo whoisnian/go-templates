@@ -1,7 +1,7 @@
 module github.com/whoisnian/go-templates/cli
 
-go 1.22.0
+go 1.23.0
 
-require github.com/whoisnian/glb v1.4.0
+require github.com/whoisnian/glb v1.5.0
 
-require golang.org/x/sys v0.17.0 // indirect
+require golang.org/x/sys v0.29.0 // indirect
