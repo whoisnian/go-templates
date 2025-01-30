@@ -3,7 +3,7 @@ A command line tool that sends a request and prints the response.
 
 ## usage
 * Build binary: `./build/build.sh .`
-* Show help: `./output/cli -h`
+* Show help: `./output/cli -help`
 * Run with command-line arguments: `./output/cli -d -u https://ip.whoisnian.com`
 * Run with environment variables: `CFG_DEBUG=true CFG_URL=https://ip.whoisnian.com ./output/cli`
 
