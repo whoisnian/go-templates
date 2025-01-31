@@ -2,11 +2,11 @@ package message
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/whoisnian/glb/httpd"
+	"github.com/whoisnian/glb/logger"
 	"github.com/whoisnian/go-templates/server/global"
 	"github.com/whoisnian/go-templates/server/model"
 )
@@ -15,7 +15,7 @@ func ListHandler(store *httpd.Store) {
 	const sql = `SELECT id, content, created_at FROM messages`
 	rows, err := global.DB.Query(store.R.Context(), sql)
 	if err != nil {
-		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
+		global.LOG.Error(store.R.Context(), "pgxpool.Query", logger.Error(err))
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -25,14 +25,14 @@ func ListHandler(store *httpd.Store) {
 	for rows.Next() {
 		var msg model.Message
 		if err = rows.Scan(&msg.Id, &msg.Content, &msg.CreatedAt); err != nil {
-			global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
+			global.LOG.Error(store.R.Context(), "rows.Scan", logger.Error(err))
 			store.W.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		results = append(results, msg)
 	}
 	if err = rows.Err(); err != nil {
-		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
+		global.LOG.Error(store.R.Context(), "rows.Err", logger.Error(err))
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -51,7 +51,7 @@ func CreateHandler(store *httpd.Store) {
 	const sql = `INSERT INTO messages (content) VALUES ($1) RETURNING id, content, created_at`
 	row := global.DB.QueryRow(store.R.Context(), sql, msg.Content)
 	if err = row.Scan(&msg.Id, &msg.Content, &msg.CreatedAt); err != nil {
-		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
+		global.LOG.Error(store.R.Context(), "rows.Scan", logger.Error(err))
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -68,7 +68,7 @@ func DeleteHandler(store *httpd.Store) {
 
 	const sql = `DELETE FROM messages WHERE id = $1`
 	if _, err = global.DB.Exec(store.R.Context(), sql, id); err != nil {
-		global.LOG.Error(err.Error(), slog.String("tid", store.GetID()))
+		global.LOG.Error(store.R.Context(), "pgxpool.Exec", logger.Error(err))
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}

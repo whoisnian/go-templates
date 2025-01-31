@@ -7,45 +7,47 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/whoisnian/glb/logger"
 	"github.com/whoisnian/glb/util/osutil"
 	"github.com/whoisnian/go-templates/server/global"
 	"github.com/whoisnian/go-templates/server/router"
 )
 
 func main() {
-	global.SetupConfig()
-	global.SetupLogger()
-	global.LOG.Debugf("use config: %+v", global.CFG)
+	ctx := context.Background()
+	global.SetupConfig(ctx)
+	global.SetupLogger(ctx)
+	global.LOG.Debugf(ctx, "use config: %+v", global.CFG)
 
 	if global.CFG.Version {
 		fmt.Printf("%s %s(%s)\n", global.AppName, global.Version, global.BuildTime)
 		return
 	}
 
-	global.SetupPostgres()
+	global.SetupPostgres(ctx)
 	defer global.DB.Close()
-	global.LOG.Debug("connect to postgresql successfully")
+	global.LOG.Debug(ctx, "connect to postgresql successfully")
 	if global.CFG.FirstRun {
-		global.LOG.Info("initialize database schema in the first run")
-		global.InitDatabaseSchema()
+		global.LOG.Info(ctx, "initialize database schema in the first run")
+		global.InitDatabaseSchema(ctx)
 		return
 	}
 
-	server := &http.Server{Addr: global.CFG.ListenAddr, Handler: router.Setup()}
+	server := &http.Server{Addr: global.CFG.ListenAddr, Handler: router.Setup(ctx)}
 	go func() {
-		global.LOG.Infof("service started: http://%s", global.CFG.ListenAddr)
+		global.LOG.Infof(ctx, "service started: http://%s", global.CFG.ListenAddr)
 		if err := server.ListenAndServe(); errors.Is(err, http.ErrServerClosed) {
-			global.LOG.Warn("service shutting down")
+			global.LOG.Warn(ctx, "service shutting down")
 		} else if err != nil {
-			global.LOG.Fatal(err.Error())
+			global.LOG.Fatal(ctx, "service start", logger.Error(err))
 		}
 	}()
 
 	osutil.WaitForStop()
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	shutdownCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		global.LOG.Warn(err.Error())
+		global.LOG.Warn(ctx, "service stop", logger.Error(err))
 	}
 }

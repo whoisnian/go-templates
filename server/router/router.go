@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/whoisnian/glb/httpd"
@@ -9,9 +10,9 @@ import (
 	"github.com/whoisnian/go-templates/server/router/status"
 )
 
-func Setup() *httpd.Mux {
+func Setup(_ context.Context) *httpd.Mux {
 	mux := httpd.NewMux()
-	mux.HandleRelay(global.LOG.Relay)
+	mux.HandleMiddleware(global.LOG.NewMiddleware())
 
 	mux.Handle("/api/messages", http.MethodGet, message.ListHandler)
 	mux.Handle("/api/messages", http.MethodPost, message.CreateHandler)
