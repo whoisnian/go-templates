@@ -38,18 +38,23 @@ func (*Tracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.Tra
 
 func (t *Tracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
 	queryData := ctx.Value(tracerQueryCtxKey).(*tracerQueryData)
-	interval := time.Since(queryData.start)
+	duration := time.Since(queryData.start)
 
 	result := "OK"
 	if data.Err != nil {
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug("PG Query",
-		slog.Duration("interval", interval),
-		slog.String("result", result),
-		slog.String("sql", queryData.sql),
-		slog.Any("args", queryData.args),
+	t.LOG.Debug(ctx, "PG.TraceQueryEnd",
+		slog.Attr{
+			Key: "pg",
+			Value: slog.GroupValue(
+				slog.Duration("dur", duration),
+				slog.String("result", result),
+				slog.String("sql", queryData.sql),
+				slog.Any("args", queryData.args),
+			),
+		},
 	)
 }
 
@@ -71,26 +76,36 @@ func (t *Tracer) TraceBatchQuery(ctx context.Context, conn *pgx.Conn, data pgx.T
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug("PG BatchQuery",
-		slog.String("result", result),
-		slog.String("sql", data.SQL),
-		slog.Any("args", data.Args),
+	t.LOG.Debug(ctx, "PG.TraceBatchQuery",
+		slog.Attr{
+			Key: "pg",
+			Value: slog.GroupValue(
+				slog.String("result", result),
+				slog.String("sql", data.SQL),
+				slog.Any("args", data.Args),
+			),
+		},
 	)
 }
 
 func (t *Tracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchEndData) {
 	batchData := ctx.Value(tracerBatchCtxKey).(*tracerBatchData)
-	interval := time.Since(batchData.start)
+	duration := time.Since(batchData.start)
 
 	result := "OK"
 	if data.Err != nil {
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug("PG Batch",
-		slog.Duration("interval", interval),
-		slog.String("result", result),
-		slog.Int("size", batchData.batch.Len()),
+	t.LOG.Debug(ctx, "PG.TraceBatchEnd",
+		slog.Attr{
+			Key: "pg",
+			Value: slog.GroupValue(
+				slog.Duration("dur", duration),
+				slog.String("result", result),
+				slog.Int("size", batchData.batch.Len()),
+			),
+		},
 	)
 }
 
@@ -110,17 +125,22 @@ func (*Tracer) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data pgx.
 
 func (t *Tracer) TraceCopyFromEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromEndData) {
 	copyFromData := ctx.Value(tracerCopyFromCtxKey).(*tracerCopyFromData)
-	interval := time.Since(copyFromData.start)
+	duration := time.Since(copyFromData.start)
 
 	result := "OK"
 	if data.Err != nil {
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug("PG CopyFrom",
-		slog.Duration("interval", interval),
-		slog.String("result", result),
-		slog.String("table", copyFromData.tableName.Sanitize()),
-		slog.Any("columns", copyFromData.columnNames),
+	t.LOG.Debug(ctx, "PG.TraceCopyFromEnd",
+		slog.Attr{
+			Key: "pg",
+			Value: slog.GroupValue(
+				slog.Duration("dur", duration),
+				slog.String("result", result),
+				slog.String("table", copyFromData.tableName.Sanitize()),
+				slog.Any("columns", copyFromData.columnNames),
+			),
+		},
 	)
 }

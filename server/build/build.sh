@@ -21,8 +21,9 @@ else
 fi
 
 goBuild() {
-  CGO_ENABLED=0 GOOS="$1" GOARCH="$2" go build -trimpath \
-    -ldflags="-s -w \
+  CGO_ENABLED=0 GOOS="$1" GOARCH="$2" go build \
+    -trimpath -ldflags="-s -w \
+    -X '${MODULE_NAME}/global.ModName=${MODULE_NAME}' \
     -X '${MODULE_NAME}/global.AppName=${APP_NAME}' \
     -X '${MODULE_NAME}/global.Version=${VERSION}' \
     -X '${MODULE_NAME}/global.BuildTime=${BUILDTIME}'" \
@@ -34,6 +35,8 @@ if [[ "$1" == '.' ]]; then
 elif [[ "$1" == 'all' ]]; then
   goBuild linux amd64 "${APP_NAME}-linux-amd64-${VERSION}"
   goBuild linux arm64 "${APP_NAME}-linux-arm64-${VERSION}"
+  goBuild darwin amd64 "${APP_NAME}-darwin-amd64-${VERSION}"
+  goBuild darwin arm64 "${APP_NAME}-darwin-arm64-${VERSION}"
   goBuild windows amd64 "${APP_NAME}-windows-amd64-${VERSION}.exe"
   goBuild windows arm64 "${APP_NAME}-windows-arm64-${VERSION}.exe"
 elif [[ "$#" == 2 ]]; then
@@ -48,6 +51,8 @@ Usage:
 Supported platforms:
   linux-amd64
   linux-arm64
+  darwin-amd64
+  darwin-arm64
   windows-amd64
   windows-arm64
 EOF
