@@ -1,4 +1,4 @@
-github.com/whoisnian/glb v1.5.0 h1:QMa3tOutkYPGF17OW4xeG5hDc8hNVY7Sy2sKiHHbnZ0=
-github.com/whoisnian/glb v1.5.0/go.mod h1:pfxhoMCoPnxeGYDqRwgZqJFYqH1eI/sV3dI4F97KbBM=
+github.com/whoisnian/glb v1.5.2 h1:bpnSIdfBIFJpTOUD7uyTeXVFbcb0wEH3w3qLrT23HXI=
+github.com/whoisnian/glb v1.5.2/go.mod h1:pfxhoMCoPnxeGYDqRwgZqJFYqH1eI/sV3dI4F97KbBM=
 golang.org/x/sys v0.29.0 h1:TPYlXGxvx1MGTn2GiZDhnjPA9wZzZeGKHHmKhHYvgaU=
 golang.org/x/sys v0.29.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
