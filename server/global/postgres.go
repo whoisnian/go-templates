@@ -9,7 +9,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/whoisnian/glb/logger"
-	"github.com/whoisnian/go-templates/server/pkg/postgres"
 	"github.com/whoisnian/go-templates/server/schema"
 )
 

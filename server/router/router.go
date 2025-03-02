@@ -6,12 +6,14 @@ import (
 
 	"github.com/whoisnian/glb/httpd"
 	"github.com/whoisnian/go-templates/server/global"
+	"github.com/whoisnian/go-templates/server/pkg/tracer"
 	"github.com/whoisnian/go-templates/server/router/message"
 	"github.com/whoisnian/go-templates/server/router/status"
 )
 
 func Setup(_ context.Context) *httpd.Mux {
 	mux := httpd.NewMux()
+	mux.HandleMiddleware(tracer.NewHttpdMiddleware())
 	mux.HandleMiddleware(global.LOG.NewMiddleware())
 
 	mux.Handle("/api/messages", http.MethodGet, message.ListHandler)
