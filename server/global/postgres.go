@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/whoisnian/glb/logger"
-	"github.com/whoisnian/go-templates/server/pkg/postgres"
+	"github.com/whoisnian/go-templates/server/pkg/tracer"
 	"github.com/whoisnian/go-templates/server/schema"
 )
 
@@ -21,7 +21,7 @@ func SetupPostgres(ctx context.Context) {
 		LOG.Fatal(ctx, "pgxpool.ParseConfig", logger.Error(err))
 	}
 	if CFG.Debug {
-		cfg.ConnConfig.Tracer = &postgres.Tracer{LOG: LOG}
+		cfg.ConnConfig.Tracer = &tracer.PgTracer{LOG: LOG}
 	}
 
 	DB, err = pgxpool.NewWithConfig(ctx, cfg)

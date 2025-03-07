@@ -6,6 +6,7 @@ import (
 
 	"github.com/whoisnian/glb/ansi"
 	"github.com/whoisnian/glb/logger"
+	"github.com/whoisnian/go-templates/server/pkg/tracer"
 )
 
 var LOG *logger.Logger
@@ -23,11 +24,17 @@ func SetupLogger(_ context.Context) {
 
 	switch CFG.LogFmt {
 	case "nano":
-		LOG = logger.New(logger.NewNanoHandler(os.Stderr, opts))
+		LOG = logger.New(&tracer.WrapHandler{
+			Handler: logger.NewNanoHandler(os.Stderr, opts),
+		})
 	case "text":
-		LOG = logger.New(logger.NewTextHandler(os.Stderr, opts))
+		LOG = logger.New(&tracer.WrapHandler{
+			Handler: logger.NewTextHandler(os.Stderr, opts),
+		})
 	case "json":
-		LOG = logger.New(logger.NewJsonHandler(os.Stderr, opts))
+		LOG = logger.New(&tracer.WrapHandler{
+			Handler: logger.NewJsonHandler(os.Stderr, opts),
+		})
 	default:
 		panic("unknown log format")
 	}

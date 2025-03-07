@@ -1,4 +1,4 @@
-package postgres
+package tracer
 
 import (
 	"context"
@@ -9,35 +9,35 @@ import (
 	"github.com/whoisnian/glb/logger"
 )
 
-type Tracer struct {
+type PgTracer struct {
 	LOG *logger.Logger
 }
 
-type ctxKey int
+type pgTraceCtxKey int
 
 const (
-	_ ctxKey = iota
-	tracerQueryCtxKey
-	tracerBatchCtxKey
-	tracerCopyFromCtxKey
+	_ pgTraceCtxKey = iota
+	pgTraceQueryCtxKey
+	pgTraceBatchCtxKey
+	pgTraceCopyFromCtxKey
 )
 
-type tracerQueryData struct {
+type traceQueryData struct {
 	start time.Time
 	sql   string
 	args  []any
 }
 
-func (*Tracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
-	return context.WithValue(ctx, tracerQueryCtxKey, &tracerQueryData{
+func (*PgTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
+	return context.WithValue(ctx, pgTraceQueryCtxKey, &traceQueryData{
 		start: time.Now(),
 		sql:   data.SQL,
 		args:  data.Args,
 	})
 }
 
-func (t *Tracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
-	queryData := ctx.Value(tracerQueryCtxKey).(*tracerQueryData)
+func (pt *PgTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
+	queryData := ctx.Value(pgTraceQueryCtxKey).(*traceQueryData)
 	duration := time.Since(queryData.start)
 
 	result := "OK"
@@ -45,7 +45,7 @@ func (t *Tracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.Tra
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug(ctx, "PG.TraceQueryEnd",
+	pt.LOG.Debug(ctx, "PG.TraceQueryEnd",
 		slog.Attr{
 			Key: "pg",
 			Value: slog.GroupValue(
@@ -58,25 +58,25 @@ func (t *Tracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.Tra
 	)
 }
 
-type tracerBatchData struct {
+type traceBatchData struct {
 	start time.Time
 	batch *pgx.Batch
 }
 
-func (*Tracer) TraceBatchStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchStartData) context.Context {
-	return context.WithValue(ctx, tracerBatchCtxKey, &tracerBatchData{
+func (*PgTracer) TraceBatchStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchStartData) context.Context {
+	return context.WithValue(ctx, pgTraceBatchCtxKey, &traceBatchData{
 		start: time.Now(),
 		batch: data.Batch,
 	})
 }
 
-func (t *Tracer) TraceBatchQuery(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchQueryData) {
+func (pt *PgTracer) TraceBatchQuery(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchQueryData) {
 	result := "OK"
 	if data.Err != nil {
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug(ctx, "PG.TraceBatchQuery",
+	pt.LOG.Debug(ctx, "PG.TraceBatchQuery",
 		slog.Attr{
 			Key: "pg",
 			Value: slog.GroupValue(
@@ -88,8 +88,8 @@ func (t *Tracer) TraceBatchQuery(ctx context.Context, conn *pgx.Conn, data pgx.T
 	)
 }
 
-func (t *Tracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchEndData) {
-	batchData := ctx.Value(tracerBatchCtxKey).(*tracerBatchData)
+func (pt *PgTracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchEndData) {
+	batchData := ctx.Value(pgTraceBatchCtxKey).(*traceBatchData)
 	duration := time.Since(batchData.start)
 
 	result := "OK"
@@ -97,7 +97,7 @@ func (t *Tracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.Tra
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug(ctx, "PG.TraceBatchEnd",
+	pt.LOG.Debug(ctx, "PG.TraceBatchEnd",
 		slog.Attr{
 			Key: "pg",
 			Value: slog.GroupValue(
@@ -109,22 +109,22 @@ func (t *Tracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.Tra
 	)
 }
 
-type tracerCopyFromData struct {
+type traceCopyFromData struct {
 	start       time.Time
 	tableName   pgx.Identifier
 	columnNames []string
 }
 
-func (*Tracer) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromStartData) context.Context {
-	return context.WithValue(ctx, tracerCopyFromCtxKey, &tracerCopyFromData{
+func (*PgTracer) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromStartData) context.Context {
+	return context.WithValue(ctx, pgTraceCopyFromCtxKey, &traceCopyFromData{
 		start:       time.Now(),
 		tableName:   data.TableName,
 		columnNames: data.ColumnNames,
 	})
 }
 
-func (t *Tracer) TraceCopyFromEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromEndData) {
-	copyFromData := ctx.Value(tracerCopyFromCtxKey).(*tracerCopyFromData)
+func (pt *PgTracer) TraceCopyFromEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromEndData) {
+	copyFromData := ctx.Value(pgTraceCopyFromCtxKey).(*traceCopyFromData)
 	duration := time.Since(copyFromData.start)
 
 	result := "OK"
@@ -132,7 +132,7 @@ func (t *Tracer) TraceCopyFromEnd(ctx context.Context, conn *pgx.Conn, data pgx.
 		result = data.Err.Error()
 	}
 
-	t.LOG.Debug(ctx, "PG.TraceCopyFromEnd",
+	pt.LOG.Debug(ctx, "PG.TraceCopyFromEnd",
 		slog.Attr{
 			Key: "pg",
 			Value: slog.GroupValue(
