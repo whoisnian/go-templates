@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/whoisnian/glb/logger"
@@ -19,7 +20,7 @@ func main() {
 	global.LOG.Debugf(ctx, "use config: %+v", global.CFG)
 
 	if global.CFG.Version {
-		fmt.Printf("%s %s(%s)\n", global.AppName, global.Version, global.BuildTime)
+		fmt.Printf("%s version %s built with %s at %s\n", global.AppName, global.Version, runtime.Version(), global.BuildTime)
 		return
 	}
 
