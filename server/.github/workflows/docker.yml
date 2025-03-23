@@ -39,7 +39,7 @@ jobs:
         run: echo "module_name=$(go mod edit -fmt -print | grep -Po '(?<=^module ).*$')" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./build/Dockerfile
