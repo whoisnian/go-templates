@@ -36,7 +36,7 @@ func ListHandler(store *httpd.Store) {
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	store.RespondJson(results)
+	store.RespondJson(http.StatusOK, results)
 }
 
 func CreateHandler(store *httpd.Store) {
@@ -55,7 +55,7 @@ func CreateHandler(store *httpd.Store) {
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	store.RespondJson(msg)
+	store.RespondJson(http.StatusOK, msg)
 }
 
 func DeleteHandler(store *httpd.Store) {
@@ -72,5 +72,5 @@ func DeleteHandler(store *httpd.Store) {
 		store.W.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	store.RespondJson(nil)
+	store.RespondJson(http.StatusOK, nil)
 }
