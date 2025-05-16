@@ -1,0 +1,3 @@
+# Ignore go workspace file
+go.work
+go.work.sum
